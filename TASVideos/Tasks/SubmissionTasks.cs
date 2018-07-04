@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,7 @@ using TASVideos.Data.Constants;
 using TASVideos.Data.Entity;
 using TASVideos.Models;
 using TASVideos.MovieParsers;
+using TASVideos.Services;
 using TASVideos.WikiEngine;
 
 namespace TASVideos.Tasks
@@ -26,19 +28,22 @@ namespace TASVideos.Tasks
 		private readonly WikiTasks _wikiTasks;
 		private readonly IMapper _mapper;
 		private readonly IHostingEnvironment _hostingEnvironment;
+		private readonly IFileService _fileService;
 
 		public SubmissionTasks(
 			ApplicationDbContext db,
 			MovieParser parser,
 			WikiTasks wikiTasks,
 			IMapper mapper,
-			IHostingEnvironment hostingEnvironment)
+			IHostingEnvironment hostingEnvironment,
+			IFileService fileService)
 		{
 			_db = db;
 			_parser = parser;
 			_wikiTasks = wikiTasks;
 			_mapper = mapper;
 			_hostingEnvironment = hostingEnvironment;
+			_fileService = fileService;
 		}
 
 		/// <summary>
@@ -175,14 +180,20 @@ namespace TASVideos.Tasks
 		/// Returns the submission file as bytes with the given id
 		/// If no submission is found, an empty byte array is returned
 		/// </summary>
-		public async Task<byte[]> GetSubmissionFile(int id)
+		public async Task<FileStreamResult> GetSubmissionFile(int id)
 		{
-			var data = await _db.Submissions
-				.Where(s => s.Id == id)
-				.Select(s => s.MovieFile)
-				.SingleOrDefaultAsync();
+			var fileId = await _db.SubmissionFiles
+				.Where(sf => sf.SubmissionId == id)
+				.OrderByDescending(sf => sf.DatabaseFile.CreateTimeStamp)
+				.Select(s => s.DatabaseFileId)
+				.FirstOrDefaultAsync();
 
-			return data ?? new byte[0];
+			if (fileId == 0)
+			{
+				return null;
+			}
+
+			return await _fileService.GetFileStreamResult(fileId);
 		}
 
 		/// <summary>
@@ -233,7 +244,6 @@ namespace TASVideos.Tasks
 				{
 					submission.Frames = parseResult.Frames;
 					submission.RerecordCount = parseResult.RerecordCount;
-					submission.MovieExtension = parseResult.FileExtension;
 					submission.System = await _db.GameSystems.SingleOrDefaultAsync(g => g.Code == parseResult.SystemCode);
 
 					if (submission.System == null)
@@ -252,14 +262,19 @@ namespace TASVideos.Tasks
 				return new SubmitResult(parseResult.Errors);
 			}
 
+			_db.Submissions.Add(submission);
+			await _db.SaveChangesAsync();
+
 			using (var memoryStream = new MemoryStream())
 			{
 				await model.MovieFile.CopyToAsync(memoryStream);
-				submission.MovieFile = memoryStream.ToArray();
+				var result = await _fileService.Store($"submission{submission.Id}.{parseResult.FileExtension}", memoryStream.ToArray());
+				_db.SubmissionFiles.Add(new SubmissionDatabaseFile
+				{
+					SubmissionId = submission.Id,
+					DatabaseFileId = result.Id
+				});
 			}
-
-			_db.Submissions.Add(submission);
-			await _db.SaveChangesAsync();
 
 			// Create a wiki page corresponding to this submission
 			var wikiPage = new WikiPage
@@ -390,7 +405,12 @@ namespace TASVideos.Tasks
 				using (var memoryStream = new MemoryStream())
 				{
 					await model.MovieFile.CopyToAsync(memoryStream);
-					submission.MovieFile = memoryStream.ToArray();
+					var storeResult = await _fileService.Store($"submission{submission.Id}.{parseResult.FileExtension}", memoryStream.ToArray());
+					_db.SubmissionFiles.Add(new SubmissionDatabaseFile
+					{
+						SubmissionId = submission.Id,
+						DatabaseFileId = storeResult.Id
+					});
 				}
 			}
 
@@ -509,13 +529,20 @@ namespace TASVideos.Tasks
 						Tier = s.IntendedTier.Name,
 						Branch = s.Branch,
 						EmulatorVersion = s.EmulatorVersion,
-						MovieExtension = s.MovieExtension
 					})
 					.SingleOrDefaultAsync();
-
+				
 				if (model != null)
 				{
 					model.AvailableMoviesToObsolete = await GetAvailableMoviesToObsolete(model.SystemId);
+
+					var dbFile = await _db.SubmissionFiles
+					.Include(sf => sf.DatabaseFile)
+					.Where(sf => sf.SubmissionId == id)
+					.OrderByDescending(sf => sf.DatabaseFile.CreateTimeStamp)
+					.FirstOrDefaultAsync();
+
+					model.MovieExtension = Path.GetExtension(dbFile.DatabaseFile.Filename);
 				}
 
 				return model;
@@ -657,25 +684,25 @@ namespace TASVideos.Tasks
 			};
 
 			// Unzip the submission file, and rezip it while renaming the contained file
-			using (var publicationFileStream = new MemoryStream())
-			{
-				using (var publicationZipArchive = new ZipArchive(publicationFileStream, ZipArchiveMode.Create))
-				using (var submissionFileStream = new MemoryStream(submission.MovieFile))
-				using (var submissionZipArchive = new ZipArchive(submissionFileStream, ZipArchiveMode.Read))
-				{
-					var publicationZipEntry = publicationZipArchive.CreateEntry(model.MovieFileName + "." + model.MovieExtension);
-					var submissionZipEntry = submissionZipArchive.Entries.Single();
+			//using (var publicationFileStream = new MemoryStream())
+			//{
+			//	using (var publicationZipArchive = new ZipArchive(publicationFileStream, ZipArchiveMode.Create))
+			//	using (var submissionFileStream = new MemoryStream(submission.MovieFile))
+			//	using (var submissionZipArchive = new ZipArchive(submissionFileStream, ZipArchiveMode.Read))
+			//	{
+			//		var publicationZipEntry = publicationZipArchive.CreateEntry(model.MovieFileName + "." + model.MovieExtension);
+			//		var submissionZipEntry = submissionZipArchive.Entries.Single();
 
-					using (var publicationZipEntryStream = publicationZipEntry.Open())
-					using (var submissionZipEntryStream = submissionZipEntry.Open())
-					{
-						await submissionZipEntryStream.CopyToAsync(publicationZipEntryStream);
-					}
-				}
+			//		using (var publicationZipEntryStream = publicationZipEntry.Open())
+			//		using (var submissionZipEntryStream = submissionZipEntry.Open())
+			//		{
+			//			await submissionZipEntryStream.CopyToAsync(publicationZipEntryStream);
+			//		}
+			//	}
 
-				publication.MovieFile = publicationFileStream.ToArray();
-			}
-
+			//	publication.MovieFile = publicationFileStream.ToArray();
+			//}
+			// FileService refactor todo
 			var publicationAuthors = submission.SubmissionAuthors
 				.Select(sa => new PublicationAuthor
 				{

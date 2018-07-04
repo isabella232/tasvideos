@@ -90,7 +90,8 @@ namespace TASVideos.Legacy.Imports
 						Status = ConvertStatus(legacySubmission.Sub.Status),
 						RomName = legacySubmission.Sub.RomName,
 						RerecordCount = legacySubmission.Sub.Rerecord,
-						MovieFile = legacySubmission.Sub.Content,
+						//MovieFile = legacySubmission.Sub.Content,
+						// Submission fileservice refactor todo
 						IntendedTierId = legacySubmission.Sub.IntendedTier,
 						GameId = legacySubmission.Sub.GameNameId ?? -1, // Placeholder game if not present
 						RomId = -1 // Legacy system had no notion of Rom for submissions
@@ -132,7 +133,8 @@ namespace TASVideos.Legacy.Imports
 				nameof(Submission.Status),
 				nameof(Submission.RomName),
 				nameof(Submission.RerecordCount),
-				nameof(Submission.MovieFile),
+				//nameof(Submission.MovieFile),
+				// submission fileservice refactor todo
 				nameof(Submission.IntendedTierId),
 				nameof(Submission.Title),
 				nameof(Submission.GameId),

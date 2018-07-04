@@ -94,7 +94,7 @@ and contributed greatly to the popularity of speedruns in general.",
 			Game = Smb3,
 			GameVersion = "JPN",
 			IntendedTierId = 2,
-			MovieFile = MorimotoSmb3File,
+			//MovieFile = MorimotoSmb3File, // Fileservice Refactor todo
 			RerecordCount = 40268,
 			RomName = "Super Mario Bros. 3 (J).nes",
 			Rom = Smb3Rom,

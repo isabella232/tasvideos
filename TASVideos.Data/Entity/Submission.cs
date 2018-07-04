@@ -36,6 +36,16 @@ namespace TASVideos.Data.Entity
 		Cancelled
 	}
 
+	// TODO: move me
+	public class SubmissionDatabaseFile
+	{
+		public int SubmissionId { get; set; }
+		public virtual Submission Submission { get; set; }
+
+		public int DatabaseFileId { get; set; }
+		public virtual DatabaseFile DatabaseFile { get; set; }
+	}
+
 	public class Submission : BaseEntity
 	{
 		public int Id { get; set; }
@@ -57,10 +67,7 @@ namespace TASVideos.Data.Entity
 		public SubmissionStatus Status { get; set; } = SubmissionStatus.New;
 		public virtual ICollection<SubmissionStatusHistory> History { get; set; } = new HashSet<SubmissionStatusHistory>();
 
-		// TODO: we eventually should want to move these to the file server instead
-		public byte[] MovieFile { get; set; }
-
-		public string MovieExtension { get; set; }
+		public virtual ICollection<SubmissionDatabaseFile> Files { get; set; } = new HashSet<SubmissionDatabaseFile>();
 
 		public int? GameId { get; set; }
 		public virtual Game.Game Game { get; set; }

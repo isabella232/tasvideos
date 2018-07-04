@@ -6,7 +6,7 @@
 		Gzip
 	}
 
-	public class DatabaseFile
+	public class DatabaseFile : BaseEntity
 	{
 		public int Id { get; set; }
 

@@ -28,6 +28,7 @@ namespace TASVideos.Data
 		public DbSet<WikiPageReferral> WikiReferrals { get; set; }
 		public DbSet<RoleLink> RoleLinks { get; set; }
 		public DbSet<Submission> Submissions { get; set; }
+		public DbSet<SubmissionDatabaseFile> SubmissionFiles { get; set; }
 		public DbSet<SubmissionAuthor> SubmissionAuthors { get; set; }
 		public DbSet<SubmissionStatusHistory> SubmissionStatusHistory { get; set; }
 		public DbSet<Tier> Tiers { get; set; }

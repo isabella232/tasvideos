@@ -66,12 +66,12 @@ namespace TASVideos.Controllers
 		public async Task<IActionResult> Download(int id)
 		{
 			var submissionFile = await _submissionTasks.GetSubmissionFile(id);
-			if (submissionFile.Length > 0)
+			if (submissionFile == null)
 			{
-				return File(submissionFile, MediaTypeNames.Application.Octet, $"submission{id}.zip");
+				return NotFound();
 			}
 
-			return BadRequest();
+			return submissionFile;
 		}
 
 		[RequirePermission(PermissionTo.SubmitMovies)]
