@@ -237,7 +237,12 @@ namespace TASVideos.Tasks
 
 			// Parse movie file
 			// TODO: check warnings
-			var parseResult = _parser.Parse(model.MovieFile.OpenReadStream());
+			IParseResult parseResult;
+			using (var stream = model.MovieFile.OpenReadStream())
+			{
+				parseResult = _parser.Parse(stream, Path.GetExtension(model.MovieFile.FileName));
+			}
+
 			if (parseResult.Success)
 			{
 				using (_db.Database.BeginTransaction())
@@ -268,7 +273,7 @@ namespace TASVideos.Tasks
 			using (var memoryStream = new MemoryStream())
 			{
 				await model.MovieFile.CopyToAsync(memoryStream);
-				var result = await _fileService.Store($"submission{submission.Id}.{parseResult.FileExtension}", memoryStream.ToArray());
+				var result = await _fileService.Store($"submission{submission.Id}{Path.GetExtension(model.MovieFile.FileName)}", memoryStream.ToArray());
 				_db.SubmissionFiles.Add(new SubmissionDatabaseFile
 				{
 					SubmissionId = submission.Id,
@@ -382,7 +387,12 @@ namespace TASVideos.Tasks
 			if (model.MovieFile != null)
 			{
 				// TODO: check warnings
-				var parseResult = _parser.Parse(model.MovieFile.OpenReadStream());
+				IParseResult parseResult;
+				using (var stream = model.MovieFile.OpenReadStream())
+				{
+					parseResult = _parser.Parse(model.MovieFile.OpenReadStream(), Path.GetExtension(model.MovieFile.FileName));
+				}
+
 				if (parseResult.Success)
 				{
 					submission.Frames = parseResult.Frames;
@@ -405,7 +415,7 @@ namespace TASVideos.Tasks
 				using (var memoryStream = new MemoryStream())
 				{
 					await model.MovieFile.CopyToAsync(memoryStream);
-					var storeResult = await _fileService.Store($"submission{submission.Id}.{parseResult.FileExtension}", memoryStream.ToArray());
+					var storeResult = await _fileService.Store($"submission{submission.Id}.{Path.GetExtension(model.MovieFile.FileName)}", memoryStream.ToArray());
 					_db.SubmissionFiles.Add(new SubmissionDatabaseFile
 					{
 						SubmissionId = submission.Id,
