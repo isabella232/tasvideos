@@ -139,7 +139,7 @@ namespace TASVideos.Data
 			context.SubmissionFiles.Add(new SubmissionDatabaseFile
 			{
 				DatabaseFile = PublicationSampleData.MorimotoSmb3DbFile,
-				Submission = PublicationSampleData.MiroMotoSubmission
+				Submission = PublicationSampleData.MorimotoSubmission
 			});
 
 			context.WikiPages.Add(PublicationSampleData.FrontPage);

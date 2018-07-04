@@ -75,7 +75,7 @@ Want to [Helping|help]? Everyone has something they can contribute."
 			Compression = Compression.None,
 			Data = MorimotoSmb3File,
 			Filename = "submission1.fmv"
-		}
+		};
 
 		public static readonly WikiPage MorimotoSmb3SubWiki = new WikiPage
 		{
