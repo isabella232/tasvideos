@@ -240,7 +240,7 @@ namespace TASVideos.Tasks
 			IParseResult parseResult;
 			using (var stream = model.MovieFile.OpenReadStream())
 			{
-				parseResult = _parser.Parse(stream, Path.GetExtension(model.MovieFile.FileName));
+				parseResult = _parser.Parse(stream);
 			}
 
 			if (parseResult.Success)
@@ -390,7 +390,7 @@ namespace TASVideos.Tasks
 				IParseResult parseResult;
 				using (var stream = model.MovieFile.OpenReadStream())
 				{
-					parseResult = _parser.Parse(model.MovieFile.OpenReadStream(), Path.GetExtension(model.MovieFile.FileName));
+					parseResult = _parser.Parse(stream);
 				}
 
 				if (parseResult.Success)
