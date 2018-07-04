@@ -72,6 +72,10 @@ namespace TASVideos.Services
 				model.CompressedSize = gzipContents.Length;
 				model.Compression = Compression.Gzip;
 				model.Data = gzipContents;
+				if (!model.Filename.EndsWith(".gz"))
+				{
+					model.Filename += ".gz";
+				}
 			}
 			else
 			{
