@@ -123,7 +123,7 @@ namespace TASVideos.Services
 				: (Stream)memoryStream;
 
 			const string filetype = "application/octet-stream";
-			var entityTag = $"db-file-{file.Id}";
+			var entityTag = $"\"dbfile{file.Id}\"";
 
 			return new FileStreamResult(stream, filetype)
 			{
