@@ -70,6 +70,13 @@ Want to [Helping|help]? Everyone has something they can contribute."
 
 		public static readonly byte[] MorimotoSmb3File = { 0x00 };
 
+		public static readonly DatabaseFile MorimotoSmb3DbFile = new DatabaseFile
+		{
+			Compression = Compression.None,
+			Data = MorimotoSmb3File,
+			Filename = "submission1.fmv"
+		};
+
 		public static readonly WikiPage MorimotoSmb3PubWiki = new WikiPage
 		{
 			PageName = "InternalSystem/PublicationContent/M1",
@@ -94,12 +101,11 @@ and contributed greatly to the popularity of speedruns in general.",
 			Game = Smb3,
 			GameVersion = "JPN",
 			IntendedTierId = 2,
-			//MovieFile = MorimotoSmb3File, // Fileservice Refactor todo
 			RerecordCount = 40268,
 			RomName = "Super Mario Bros. 3 (J).nes",
 			Rom = Smb3Rom,
 			Status = SubmissionStatus.Published,
-			SubmitterId = 1
+			SubmitterId = 1,
 		};
 
 		public static readonly PublicationFile Smb3ScreenShot = new PublicationFile

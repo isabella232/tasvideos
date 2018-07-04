@@ -134,6 +134,14 @@ namespace TASVideos.Data
 		/// </summary>
 		public static async Task GenerateDevSampleData(ApplicationDbContext context, UserManager<User> userManager)
 		{
+			context.Files.Add(PublicationSampleData.MorimotoSmb3DbFile);
+
+			context.SubmissionFiles.Add(new SubmissionDatabaseFile
+			{
+				DatabaseFile = PublicationSampleData.MorimotoSmb3DbFile,
+				Submission = PublicationSampleData.MiroMotoSubmission
+			});
+
 			context.WikiPages.Add(PublicationSampleData.FrontPage);
 			context.Games.Add(PublicationSampleData.Smb3);
 			context.Roms.Add(PublicationSampleData.Smb3Rom);
