@@ -75,6 +75,13 @@ Want to [Helping|help]? Everyone has something they can contribute."
 			Compression = Compression.None,
 			Data = MorimotoSmb3File,
 			Filename = "submission1.fmv"
+		}
+
+		public static readonly WikiPage MorimotoSmb3SubWiki = new WikiPage
+		{
+			PageName = "InternalSystem/SubmissionContent/S1",
+			Markup = "Submission text goes here",
+			RevisionMessage = ""
 		};
 
 		public static readonly WikiPage MorimotoSmb3PubWiki = new WikiPage
@@ -93,7 +100,7 @@ and contributed greatly to the popularity of speedruns in general.",
 			RevisionMessage = ""
 		};
 
-		public static readonly Submission MiroMotoSubmission = new Submission
+		public static readonly Submission MorimotoSubmission = new Submission
 		{
 			CreateTimeStamp = DateTime.Parse("2003-11-20 01:00:00.0000000"),
 			CreateUserName = "Bisqwit",
@@ -106,6 +113,9 @@ and contributed greatly to the popularity of speedruns in general.",
 			Rom = Smb3Rom,
 			Status = SubmissionStatus.Published,
 			SubmitterId = 1,
+			SystemId = 1,
+			SystemFrameRateId = 1,
+			WikiContent = MorimotoSmb3SubWiki
 		};
 
 		public static readonly PublicationFile Smb3ScreenShot = new PublicationFile
@@ -139,7 +149,7 @@ and contributed greatly to the popularity of speedruns in general.",
 			PublicationFlags = MorimotoSmb3PublicationFlags,
 			RerecordCount = 40268,
 			Rom = Smb3Rom,
-			Submission = MiroMotoSubmission,
+			Submission = MorimotoSubmission,
 			SystemId = 1,
 			SystemFrameRateId = 1,
 			TierId = 1,
