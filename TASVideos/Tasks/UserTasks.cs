@@ -143,7 +143,10 @@ namespace TASVideos.Tasks
 					IsLockedOut = u.LockoutEnabled && u.LockoutEnd.HasValue,
 					TimezoneId = u.TimeZoneId,
 					PublicRatings = u.PublicRatings,
-					Roles = u.UserRoles.Select(ur => ur.Role.Name) // TODO: add .ToList() here to avoid n+1 after 2.1 preview1 bug is fixed
+					From = u.From,
+					Roles = u.UserRoles
+						.Select(ur => ur.Role.Name) 
+						.ToList()
 				})
 				.SingleAsync(u => u.Id == id);
 		}
@@ -220,6 +223,8 @@ namespace TASVideos.Tasks
 			{
 				user.TimeZoneId = model.TimezoneId;
 			}
+
+			user.From = model.From;
 			
 			_db.UserRoles.RemoveRange(_db.UserRoles.Where(ur => ur.User == user));
 			await _db.SaveChangesAsync();
@@ -234,11 +239,12 @@ namespace TASVideos.Tasks
 			await _db.SaveChangesAsync();
 		}
 
-		public async Task UpdateUserProfile(int id, string timezoneId, bool publicRatings)
+		public async Task UpdateUserProfile(int id, string timezoneId, bool publicRatings, string from)
 		{
 			var user = await _db.Users.SingleAsync(u => u.Id == id);
 			user.TimeZoneId = timezoneId;
 			user.PublicRatings = publicRatings;
+			user.From = from;
 			await _db.SaveChangesAsync();
 		}
 
